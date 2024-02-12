@@ -8,6 +8,8 @@ slint::slint!{
     }
     component Button {
         in property <string> text;
+        min-height: 25px;
+        min-width: 25px;
         Rectangle {
             background: ta.pressed ? red : ta.has-hover ? #93af93 : #adb1b6;
             animate background { duration: 100ms; }
@@ -22,7 +24,7 @@ slint::slint!{
     }
     export component App inherits Window {
         background: silver;
-        width: 300px;
+        width: 350px;
         height: 500px;
         in property <int> value: 2;
         GridLayout {
@@ -33,19 +35,24 @@ slint::slint!{
                 Button { text: "1";}
                 Button { text: "2";}
                 Button { text: "3";}
+                Button { text: "+";}
             }
             Row {
                 Button { text: "4";}
                 Button { text: "5";}
                 Button { text: "6";}
+                Button { text: "-";}
             }
             Row {
                 Button { text: "7";}
                 Button { text: "8";}
                 Button { text: "9";}
+                Button { text: "*";}
             }
             Row {
-                Button { text: "0"; colspan: 3;}
+                Button { text: "0"; colspan: 2;}
+                Button { text: "="; col: 2;}
+                Button { text: "/"; col: 3;}
             }
         }
     }
