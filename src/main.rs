@@ -3,22 +3,28 @@ use slint::Weak;
 slint::slint!{
     import { VerticalBox } from "std-widgets.slint";    // remove button and add it below - customised
  
+    export global CalcLogic {
+        callback button-pressed(string);
+    }
     component Button {
         in property <string> text;
         Rectangle {
             background: ta.pressed ? red : ta.has-hover ? #93af93 : #52a1f0;
+            animate background { duration: 100ms; }
             border-radius: 4px;
             border-width: 2px;
             border-color: self.background.darker(20%);
-            ta := TouchArea {}
+            ta := TouchArea {
+                clicked => { CalcLogic.button-pressed(root.text); }
+            }
         }
         Text { text: root.text; }
     }
     export component App inherits Window {
         in property <int> counter: 2;
         GridLayout {
-            padding: 20px;
-            spacing: 10px;
+            padding: 10px;
+            spacing: 5px;
             Text { text: counter; colspan: 3;}
             Row {
                 Button { text: "1";}
@@ -44,7 +50,7 @@ slint::slint!{
 
 fn main() {
     let app: App = App::new().unwrap();
-    let weak: Weak<App> = app.as_weak();
+    let _weak: Weak<App> = app.as_weak();
 
     app.run().unwrap();
 }
