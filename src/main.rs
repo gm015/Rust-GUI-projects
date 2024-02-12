@@ -1,4 +1,4 @@
-use slint::Weak;
+use std::{cell::{RefCell, RefMut}, rc::Rc};
 
 slint::slint!{
     import { VerticalBox } from "std-widgets.slint";    // remove button and add it below - customised
@@ -26,7 +26,7 @@ slint::slint!{
         background: silver;
         width: 350px;
         height: 500px;
-        in property <int> value: 2;
+        in property <int> value: 0;
         GridLayout {
             padding: 10px;
             spacing: 5px;
@@ -58,15 +58,45 @@ slint::slint!{
     }
 }
 
+#[derive(Default)]
+struct CalcState {
+    prev_value: i32,
+    current_value: i32,
+    operator: slint::SharedString,
+}
 fn main() {
     let app: App = App::new().unwrap();
-    let weak: Weak<App> = app.as_weak();
+    let weak = app.as_weak();
+    let state: Rc<RefCell<CalcState>> = Rc::new(RefCell::new(CalcState::default()));
 
     app.global::<logic_pressed_button>().on_button_pressed(
         move |value| {
         let app = weak.unwrap();
-        app.set_value(value.parse().unwrap());
-        },
-    );
+        let mut state: RefMut<CalcState> = state.borrow_mut();
+        
+        if let Ok(val) = value.parse::<i32>() {
+            state.current_value *= 10;
+            state.current_value += val;
+            app.set_value(state.current_value);
+            return;
+        }
+        if value.as_str() == "=" {
+            let result: i32 = match state.operator.as_str() {
+                "+" => state.prev_value + state.current_value,
+                "-" => state.prev_value - state.current_value,
+                "*" => state.prev_value * state.current_value,
+                "/" => state.prev_value / state.current_value,
+                _ => return,
+            };
+            app.set_value(result);
+            state.current_value = 0;
+            state.prev_value = result;
+            state.operator = Default::default();
+        } else {
+            state.operator = value.clone();
+            state.prev_value = state.current_value;
+            state.current_value = 0;
+        }
+    });
     app.run().unwrap();
 }
